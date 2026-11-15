@@ -6,7 +6,7 @@
   "use strict";
 
   var MAX_NAME_LEN = 48;
-  var MAX_COMMENTS_LEN = 500;
+  var MAX_COMMENTS_LEN = 2000;
 
   var KEYS = [
     "f",

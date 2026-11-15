@@ -52,7 +52,7 @@ The **Share link** control builds a URL of the form:
 https://your-host/path/to/page/#f=5800&u=mi&bw=10&c=Site+notes&a_name=North&b_name=South&...
 ```
 
-Opening that URL restores frequency, units, channel width, distances, comments, radio names, and both radios’ RF settings. Other sites can deep-link with those hash parameters to pre-fill the page. Comments use the `c` parameter (up to 500 characters).
+Opening that URL restores frequency, units, channel width, distances, comments, radio names, and both radios’ RF settings. Other sites can deep-link with those hash parameters to pre-fill the page. Comments use the `c` parameter (up to 2000 characters).
 
 ## License
 
