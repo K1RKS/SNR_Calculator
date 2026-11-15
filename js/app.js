@@ -15,7 +15,6 @@
     readoutDistanceLabel: document.getElementById("readout-distance-label"),
     unitLabels: document.querySelectorAll(".unit-label"),
     shareLink: document.getElementById("share-link"),
-    shareCopy: document.getElementById("share-copy"),
     shareStatus: document.getElementById("share-status"),
     outFspl: document.getElementById("out-fspl"),
     outRssiAb: document.getElementById("out-rssi-ab"),
@@ -367,28 +366,27 @@
       });
     });
 
-    els.shareCopy.addEventListener("click", function () {
-      var url = updateShareHref();
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(
-          function () {
-            setStatus("Copied");
-          },
-          function () {
-            fallbackCopy(url);
-          }
-        );
-      } else {
-        fallbackCopy(url);
-      }
-    });
-
     els.shareLink.addEventListener("click", function (evt) {
-      updateShareHref();
-      // Keep default navigation disabled so click can also copy; right-click still uses href.
+      // Left-click copies; right-click "Copy link address" still uses the live href.
       evt.preventDefault();
-      els.shareCopy.click();
+      copyShareUrl();
     });
+  }
+
+  function copyShareUrl() {
+    var url = updateShareHref();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(
+        function () {
+          setStatus("Copied");
+        },
+        function () {
+          fallbackCopy(url);
+        }
+      );
+    } else {
+      fallbackCopy(url);
+    }
   }
 
   function fallbackCopy(text) {
@@ -403,7 +401,7 @@
       document.execCommand("copy");
       setStatus("Copied");
     } catch (err) {
-      setStatus("Copy failed — use the Share link");
+      setStatus("Copy failed — right-click the Share link instead");
     }
     document.body.removeChild(ta);
   }

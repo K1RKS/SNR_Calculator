@@ -118,15 +118,15 @@ body {
   color: var(--accent-2);
 }
 
-.field[hidden],
-[hidden] {
-  display: none !important;
-}
-
 .field {
   display: grid;
   gap: 0.3rem;
   font-size: 0.9rem;
+}
+
+.field[hidden],
+[hidden] {
+  display: none !important;
 }
 
 .field span {
@@ -215,7 +215,7 @@ body {
 }
 
 .share-link,
-.share-copy {
+.github-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -228,19 +228,20 @@ body {
 }
 
 .share-link {
-  background: transparent;
-  border: 1px solid var(--accent);
-  color: var(--ink);
-}
-
-.share-copy {
   background: var(--accent);
   border: 1px solid var(--accent);
   color: #04140c;
 }
 
-.share-copy:hover,
-.share-link:hover {
+.github-link {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.share-link:hover,
+.github-link:hover {
   filter: brightness(1.08);
 }
 

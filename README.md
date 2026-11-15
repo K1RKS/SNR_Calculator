@@ -2,6 +2,8 @@
 
 Interactive web page that graphs **signal-to-noise ratio (SNR) versus distance** between two Wi-Fi radios over free space. Aimed at AREDN-style site planning.
 
+Repository: https://github.com/K1RKS/SNR_Calculator
+
 ## Features
 
 - SNR vs distance for **both directions** (A→B and B→A)
@@ -43,7 +45,7 @@ Chart.js is shipped under `js/` (`chart.umd.min.js`) so the page works without a
 
 ## Share links
 
-The **Share link** / **Copy share link** controls build a URL of the form:
+The **Share link** control builds a URL of the form:
 
 ```
 https://your-host/path/to/page/#f=5800&u=mi&bw=10&...
