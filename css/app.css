@@ -251,14 +251,44 @@ body {
   min-height: 1.2em;
 }
 
-.footer {
+.notes {
   margin-top: 2rem;
+  padding: 1rem 1.1rem 1.15rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
-.footer p {
+.notes h2 {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--accent-2);
+  font-weight: 600;
+}
+
+.notes ul {
   margin: 0;
+  padding-left: 1.15rem;
+}
+
+.notes > ul > li + li {
+  margin-top: 0.75rem;
+}
+
+.notes ul ul {
+  margin: 0.45rem 0 0;
+}
+
+.notes ul ul li + li {
+  margin-top: 0.3rem;
+}
+
+.notes strong {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 @media (max-width: 640px) {

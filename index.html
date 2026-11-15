@@ -53,7 +53,11 @@
 
       <div class="radios">
         <fieldset class="radio-panel" data-radio="A">
-          <legend>Radio A</legend>
+          <legend class="radio-legend">Radio A</legend>
+          <label class="field">
+            <span>Name</span>
+            <input type="text" class="radio-name" maxlength="48" value="Radio A" autocomplete="off" spellcheck="false">
+          </label>
           <label class="field">
             <span>Antenna type</span>
             <select class="antenna-type">
@@ -80,7 +84,11 @@
         </fieldset>
 
         <fieldset class="radio-panel" data-radio="B">
-          <legend>Radio B</legend>
+          <legend class="radio-legend">Radio B</legend>
+          <label class="field">
+            <span>Name</span>
+            <input type="text" class="radio-name" maxlength="48" value="Radio B" autocomplete="off" spellcheck="false">
+          </label>
           <label class="field">
             <span>Antenna type</span>
             <select class="antenna-type">
@@ -112,7 +120,7 @@
       <div class="chart-wrap">
         <canvas id="snr-chart" role="img" aria-label="SNR versus distance for both link directions"></canvas>
       </div>
-      <p class="chart-note">Reference lines at 5, 10, 15, and 20 dB SNR. Ideal free-space only — not a terrain or Fresnel clearance model.</p>
+      <p class="chart-note">Dashed lines mark common SNR planning thresholds — see Notes below.</p>
     </section>
 
     <section class="readout" aria-label="Distance readout">
@@ -126,19 +134,19 @@
           <dd id="out-fspl">—</dd>
         </div>
         <div>
-          <dt>A → B RSSI</dt>
+          <dt id="label-rssi-ab">A → B RSSI</dt>
           <dd id="out-rssi-ab">—</dd>
         </div>
         <div>
-          <dt>A → B SNR</dt>
+          <dt id="label-snr-ab">A → B SNR</dt>
           <dd id="out-snr-ab">—</dd>
         </div>
         <div>
-          <dt>B → A RSSI</dt>
+          <dt id="label-rssi-ba">B → A RSSI</dt>
           <dd id="out-rssi-ba">—</dd>
         </div>
         <div>
-          <dt>B → A SNR</dt>
+          <dt id="label-snr-ba">B → A SNR</dt>
           <dd id="out-snr-ba">—</dd>
         </div>
       </dl>
@@ -150,9 +158,31 @@
       <a class="github-link" href="https://github.com/K1RKS/SNR_Calculator" target="_blank" rel="noopener noreferrer">GitHub</a>
     </section>
 
-    <footer class="footer">
-      <p>Friis free-space path loss. Changing channel width adjusts both noise floors by 10·log<sub>10</sub>(new/old).</p>
-    </footer>
+    <section class="notes" aria-labelledby="notes-heading">
+      <h2 id="notes-heading">Notes</h2>
+      <ul>
+        <li>
+          <strong>Path model.</strong> This calculator uses Friis free-space path loss only.
+          It does not account for terrain, trees, buildings, Earth curvature, or Fresnel clearance.
+          Treat results as an ideal upper bound for planning.
+        </li>
+        <li>
+          <strong>SNR reference lines.</strong> Higher SNR supports higher modulation and more reliable links.
+          The dashed lines are common Wi‑Fi / mesh planning rules of thumb (exact MCS thresholds vary by radio and channel width):
+          <ul>
+            <li><strong>20 dB</strong> — comfortable / “good” link; usually supports solid mid-to-high rates with margin for fade.</li>
+            <li><strong>15 dB</strong> — usable / “OK” link; often workable for moderate throughput, less headroom.</li>
+            <li><strong>10 dB</strong> — marginal; may stay associated at low rates but is sensitive to noise and fade.</li>
+            <li><strong>5 dB</strong> — very weak; often dropouts or failure under real conditions.</li>
+          </ul>
+          Where your curve crosses these lines is a quick estimate of usable distance each way.
+        </li>
+        <li>
+          <strong>Channel width.</strong> Changing channel width adjusts both noise floors by
+          10·log<sub>10</sub>(new/old) to reflect thermal noise scaling (about +3 dB when doubling bandwidth).
+        </li>
+      </ul>
+    </section>
   </div>
 
   <script src="js/chart.umd.min.js"></script>

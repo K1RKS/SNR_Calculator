@@ -9,10 +9,10 @@ Repository: https://github.com/K1RKS/SNR_Calculator
 - SNR vs distance for **both directions** (A→B and B→A)
 - Frequency presets: **5.8 GHz**, **2.4 GHz**, **900 MHz**, plus custom MHz
 - Channel width (5 / 10 / 20 / 40 MHz) with thermal noise-floor scaling
-- Per-radio antenna type presets, gain, TX power, and noise floor
+- Per-radio **names**, antenna type presets, gain, TX power, and noise floor
 - Distance units: **miles** (default) or kilometers
 - Distance readout for FSPL, RSSI, and SNR
-- **Share link** that encodes the full configuration in the URL hash
+- **Share link** that encodes the full configuration (including names) in the URL hash
 
 ## Path model
 
@@ -48,10 +48,10 @@ Chart.js is shipped under `js/` (`chart.umd.min.js`) so the page works without a
 The **Share link** control builds a URL of the form:
 
 ```
-https://your-host/path/to/page/#f=5800&u=mi&bw=10&...
+https://your-host/path/to/page/#f=5800&u=mi&bw=10&a_name=North&b_name=South&...
 ```
 
-Opening that URL restores frequency, units, channel width, distances, and both radio settings.
+Opening that URL restores frequency, units, channel width, distances, radio names, and both radios’ RF settings. Other sites can deep-link with those hash parameters to pre-fill the page.
 
 ## License
 

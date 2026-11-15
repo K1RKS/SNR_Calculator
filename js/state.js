@@ -5,6 +5,8 @@
 (function (global) {
   "use strict";
 
+  var MAX_NAME_LEN = 48;
+
   var KEYS = [
     "f",
     "fp",
@@ -12,10 +14,12 @@
     "bw",
     "max",
     "rd",
+    "a_name",
     "a_type",
     "a_g",
     "a_tx",
     "a_nf",
+    "b_name",
     "b_type",
     "b_g",
     "b_tx",
@@ -31,12 +35,14 @@
       maxDistance: 50,
       readoutDistance: 10,
       radioA: {
+        name: "Radio A",
         antennaType: "panel",
         gain: 19,
         txPower: 27,
         noiseFloor: -95
       },
       radioB: {
+        name: "Radio B",
         antennaType: "panel",
         gain: 19,
         txPower: 27,
@@ -50,6 +56,20 @@
     return Math.round(Number(n) * f) / f;
   }
 
+  function sanitizeName(value, fallback) {
+    var s = String(value == null ? "" : value)
+      .replace(/[\u0000-\u001f\u007f]/g, "")
+      .trim()
+      .replace(/\s+/g, " ");
+    if (!s) {
+      return fallback;
+    }
+    if (s.length > MAX_NAME_LEN) {
+      s = s.slice(0, MAX_NAME_LEN).trim();
+    }
+    return s || fallback;
+  }
+
   function encode(state) {
     var p = new URLSearchParams();
     p.set("f", String(round(state.frequencyMHz, 4)));
@@ -58,10 +78,12 @@
     p.set("bw", String(round(state.channelWidthMHz, 2)));
     p.set("max", String(round(state.maxDistance, 4)));
     p.set("rd", String(round(state.readoutDistance, 4)));
+    p.set("a_name", sanitizeName(state.radioA.name, "Radio A"));
     p.set("a_type", state.radioA.antennaType);
     p.set("a_g", String(round(state.radioA.gain, 2)));
     p.set("a_tx", String(round(state.radioA.txPower, 2)));
     p.set("a_nf", String(round(state.radioA.noiseFloor, 2)));
+    p.set("b_name", sanitizeName(state.radioB.name, "Radio B"));
     p.set("b_type", state.radioB.antennaType);
     p.set("b_g", String(round(state.radioB.gain, 2)));
     p.set("b_tx", String(round(state.radioB.txPower, 2)));
@@ -102,12 +124,14 @@
       maxDistance: Math.max(maxD, 0),
       readoutDistance: Math.max(rd, 0),
       radioA: {
+        name: sanitizeName(p.get("a_name"), base.radioA.name),
         antennaType: p.get("a_type") || base.radioA.antennaType,
         gain: num(p.get("a_g"), base.radioA.gain),
         txPower: num(p.get("a_tx"), base.radioA.txPower),
         noiseFloor: num(p.get("a_nf"), base.radioA.noiseFloor)
       },
       radioB: {
+        name: sanitizeName(p.get("b_name"), base.radioB.name),
         antennaType: p.get("b_type") || base.radioB.antennaType,
         gain: num(p.get("b_g"), base.radioB.gain),
         txPower: num(p.get("b_tx"), base.radioB.txPower),
@@ -122,7 +146,9 @@
   }
 
   global.SNRCalcState = {
+    MAX_NAME_LEN: MAX_NAME_LEN,
     defaultState: defaultState,
+    sanitizeName: sanitizeName,
     encode: encode,
     decode: decode,
     shareUrl: shareUrl

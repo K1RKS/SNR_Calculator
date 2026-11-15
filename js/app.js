@@ -21,6 +21,10 @@
     outSnrAb: document.getElementById("out-snr-ab"),
     outRssiBa: document.getElementById("out-rssi-ba"),
     outSnrBa: document.getElementById("out-snr-ba"),
+    labelRssiAb: document.getElementById("label-rssi-ab"),
+    labelSnrAb: document.getElementById("label-snr-ab"),
+    labelRssiBa: document.getElementById("label-rssi-ba"),
+    labelSnrBa: document.getElementById("label-snr-ba"),
     radioA: document.querySelector('.radio-panel[data-radio="A"]'),
     radioB: document.querySelector('.radio-panel[data-radio="B"]')
   };
@@ -29,8 +33,9 @@
   var chart = null;
   var statusTimer = null;
 
-  function radioFromPanel(panel) {
+  function radioFromPanel(panel, fallbackName) {
     return {
+      name: State.sanitizeName(panel.querySelector(".radio-name").value, fallbackName),
       antennaType: panel.querySelector(".antenna-type").value,
       gain: Number(panel.querySelector(".gain").value),
       txPower: Number(panel.querySelector(".tx-power").value),
@@ -39,6 +44,8 @@
   }
 
   function applyRadioToPanel(panel, radio) {
+    panel.querySelector(".radio-name").value = radio.name;
+    panel.querySelector(".radio-legend").textContent = radio.name;
     panel.querySelector(".antenna-type").value = radio.antennaType;
     panel.querySelector(".gain").value = radio.gain;
     panel.querySelector(".tx-power").value = radio.txPower;
@@ -60,8 +67,8 @@
       channelWidthMHz: Number(els.channelWidth.value),
       maxDistance: Number(els.maxDistance.value),
       readoutDistance: Number(els.readoutDistance.value),
-      radioA: radioFromPanel(els.radioA),
-      radioB: radioFromPanel(els.radioB)
+      radioA: radioFromPanel(els.radioA, "Radio A"),
+      radioB: radioFromPanel(els.radioB, "Radio B")
     };
   }
 
@@ -271,9 +278,19 @@
     var a = state.radioA;
     var b = state.radioB;
 
+    var nameA = a.name || "Radio A";
+    var nameB = b.name || "Radio B";
+    var labelAb = nameA + " → " + nameB;
+    var labelBa = nameB + " → " + nameA;
+
+    els.radioA.querySelector(".radio-legend").textContent = nameA;
+    els.radioB.querySelector(".radio-legend").textContent = nameB;
+
     var curveAb = RF.sampleCurve(state.maxDistance, state.units, freq, a, b, 120);
     var curveBa = RF.sampleCurve(state.maxDistance, state.units, freq, b, a, 120);
 
+    chart.data.datasets[0].label = labelAb + " SNR";
+    chart.data.datasets[1].label = labelBa + " SNR";
     chart.data.datasets[0].data = curveAb.x.map(function (x, i) {
       return { x: x, y: curveAb.snr[i] };
     });
@@ -290,6 +307,11 @@
 
     var ab = RF.linkAtDistance(state.readoutDistance, state.units, freq, a, b);
     var ba = RF.linkAtDistance(state.readoutDistance, state.units, freq, b, a);
+
+    els.labelRssiAb.textContent = labelAb + " RSSI";
+    els.labelSnrAb.textContent = labelAb + " SNR";
+    els.labelRssiBa.textContent = labelBa + " RSSI";
+    els.labelSnrBa.textContent = labelBa + " SNR";
 
     els.outFspl.textContent = formatDb(ab.fspl);
     els.outRssiAb.textContent = formatDbm(ab.rssi);
@@ -358,6 +380,7 @@
     els.readoutDistance.addEventListener("input", refresh);
 
     [els.radioA, els.radioB].forEach(function (panel) {
+      panel.querySelector(".radio-name").addEventListener("input", refresh);
       panel.querySelector(".antenna-type").addEventListener("change", function () {
         onAntennaTypeChange(panel);
       });
