@@ -5,6 +5,7 @@
   var State = window.SNRCalcState;
 
   var els = {
+    comments: document.getElementById("comments"),
     freqPreset: document.getElementById("freq-preset"),
     freqCustomWrap: document.getElementById("freq-custom-wrap"),
     freqCustom: document.getElementById("freq-custom"),
@@ -67,12 +68,14 @@
       channelWidthMHz: Number(els.channelWidth.value),
       maxDistance: Number(els.maxDistance.value),
       readoutDistance: Number(els.readoutDistance.value),
+      comments: State.sanitizeComments(els.comments.value),
       radioA: radioFromPanel(els.radioA, "Radio A"),
       radioB: radioFromPanel(els.radioB, "Radio B")
     };
   }
 
   function applyState(state) {
+    els.comments.value = state.comments || "";
     els.freqPreset.value = state.frequencyPreset;
     els.freqCustom.value = state.frequencyMHz;
     syncCustomFreqVisibility();
@@ -359,6 +362,7 @@
   }
 
   function bind() {
+    els.comments.addEventListener("input", refresh);
     els.freqPreset.addEventListener("change", function () {
       if (els.freqPreset.value !== "custom") {
         els.freqCustom.value = els.freqPreset.value;

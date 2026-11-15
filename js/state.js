@@ -6,6 +6,7 @@
   "use strict";
 
   var MAX_NAME_LEN = 48;
+  var MAX_COMMENTS_LEN = 500;
 
   var KEYS = [
     "f",
@@ -14,6 +15,7 @@
     "bw",
     "max",
     "rd",
+    "c",
     "a_name",
     "a_type",
     "a_g",
@@ -34,6 +36,7 @@
       channelWidthMHz: 10,
       maxDistance: 50,
       readoutDistance: 10,
+      comments: "",
       radioA: {
         name: "Radio A",
         antennaType: "panel",
@@ -70,14 +73,27 @@
     return s || fallback;
   }
 
+  function sanitizeComments(value) {
+    var s = String(value == null ? "" : value)
+      .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "");
+    if (s.length > MAX_COMMENTS_LEN) {
+      s = s.slice(0, MAX_COMMENTS_LEN);
+    }
+    return s;
+  }
+
   function encode(state) {
     var p = new URLSearchParams();
+    var comments = sanitizeComments(state.comments);
     p.set("f", String(round(state.frequencyMHz, 4)));
     p.set("fp", state.frequencyPreset || "custom");
     p.set("u", state.units === "km" ? "km" : "mi");
     p.set("bw", String(round(state.channelWidthMHz, 2)));
     p.set("max", String(round(state.maxDistance, 4)));
     p.set("rd", String(round(state.readoutDistance, 4)));
+    if (comments) {
+      p.set("c", comments);
+    }
     p.set("a_name", sanitizeName(state.radioA.name, "Radio A"));
     p.set("a_type", state.radioA.antennaType);
     p.set("a_g", String(round(state.radioA.gain, 2)));
@@ -123,6 +139,7 @@
       channelWidthMHz: bw,
       maxDistance: Math.max(maxD, 0),
       readoutDistance: Math.max(rd, 0),
+      comments: sanitizeComments(p.has("c") ? p.get("c") : ""),
       radioA: {
         name: sanitizeName(p.get("a_name"), base.radioA.name),
         antennaType: p.get("a_type") || base.radioA.antennaType,
@@ -147,8 +164,10 @@
 
   global.SNRCalcState = {
     MAX_NAME_LEN: MAX_NAME_LEN,
+    MAX_COMMENTS_LEN: MAX_COMMENTS_LEN,
     defaultState: defaultState,
     sanitizeName: sanitizeName,
+    sanitizeComments: sanitizeComments,
     encode: encode,
     decode: decode,
     shareUrl: shareUrl
