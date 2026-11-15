@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SNR Calculator</title>
+  <meta name="description" content="Interactive free-space SNR vs distance graph for Wi-Fi / AREDN link planning between two radios.">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>SNR Calculator</h1>
+      <p class="tagline">Free-space SNR vs distance between two radios. Built for AREDN-style site planning.</p>
+    </header>
+
+    <section class="controls" aria-label="Link parameters">
+      <div class="control-grid shared">
+        <label class="field">
+          <span>Frequency</span>
+          <select id="freq-preset">
+            <option value="5800">5.8 GHz</option>
+            <option value="2400">2.4 GHz</option>
+            <option value="900">900 MHz</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+        <label class="field" id="freq-custom-wrap" hidden>
+          <span>Custom (MHz)</span>
+          <input type="number" id="freq-custom" min="1" step="0.001" value="5800">
+        </label>
+        <label class="field">
+          <span>Channel width</span>
+          <select id="channel-width">
+            <option value="5">5 MHz</option>
+            <option value="10" selected>10 MHz</option>
+            <option value="20">20 MHz</option>
+            <option value="40">40 MHz</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Units</span>
+          <select id="units">
+            <option value="mi" selected>Miles</option>
+            <option value="km">Kilometers</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Max distance (<span class="unit-label">mi</span>)</span>
+          <input type="number" id="max-distance" min="0.1" step="0.1" value="50">
+        </label>
+      </div>
+
+      <div class="radios">
+        <fieldset class="radio-panel" data-radio="A">
+          <legend>Radio A</legend>
+          <label class="field">
+            <span>Antenna type</span>
+            <select class="antenna-type">
+              <option value="omni">Omni</option>
+              <option value="sector">Sector</option>
+              <option value="panel" selected>Panel</option>
+              <option value="dish">Dish</option>
+              <option value="yagi">Yagi</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Antenna gain (dBi)</span>
+            <input type="number" class="gain" step="0.1" value="19">
+          </label>
+          <label class="field">
+            <span>TX power (dBm)</span>
+            <input type="number" class="tx-power" step="0.1" value="27">
+          </label>
+          <label class="field">
+            <span>Noise floor (dBm)</span>
+            <input type="number" class="noise-floor" step="0.1" value="-95">
+          </label>
+        </fieldset>
+
+        <fieldset class="radio-panel" data-radio="B">
+          <legend>Radio B</legend>
+          <label class="field">
+            <span>Antenna type</span>
+            <select class="antenna-type">
+              <option value="omni">Omni</option>
+              <option value="sector">Sector</option>
+              <option value="panel" selected>Panel</option>
+              <option value="dish">Dish</option>
+              <option value="yagi">Yagi</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Antenna gain (dBi)</span>
+            <input type="number" class="gain" step="0.1" value="19">
+          </label>
+          <label class="field">
+            <span>TX power (dBm)</span>
+            <input type="number" class="tx-power" step="0.1" value="27">
+          </label>
+          <label class="field">
+            <span>Noise floor (dBm)</span>
+            <input type="number" class="noise-floor" step="0.1" value="-95">
+          </label>
+        </fieldset>
+      </div>
+    </section>
+
+    <section class="chart-section" aria-label="SNR graph">
+      <div class="chart-wrap">
+        <canvas id="snr-chart" role="img" aria-label="SNR versus distance for both link directions"></canvas>
+      </div>
+      <p class="chart-note">Reference lines at 5, 10, 15, and 20 dB SNR. Ideal free-space only — not a terrain or Fresnel clearance model.</p>
+    </section>
+
+    <section class="readout" aria-label="Distance readout">
+      <label class="field readout-slider">
+        <span>Readout distance (<span class="unit-label">mi</span>): <strong id="readout-distance-label">10</strong></span>
+        <input type="range" id="readout-distance" min="0" max="50" step="0.1" value="10">
+      </label>
+      <dl class="readout-grid">
+        <div>
+          <dt>FSPL</dt>
+          <dd id="out-fspl">—</dd>
+        </div>
+        <div>
+          <dt>A → B RSSI</dt>
+          <dd id="out-rssi-ab">—</dd>
+        </div>
+        <div>
+          <dt>A → B SNR</dt>
+          <dd id="out-snr-ab">—</dd>
+        </div>
+        <div>
+          <dt>B → A RSSI</dt>
+          <dd id="out-rssi-ba">—</dd>
+        </div>
+        <div>
+          <dt>B → A SNR</dt>
+          <dd id="out-snr-ba">—</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="share-bar" aria-label="Share">
+      <a id="share-link" class="share-link" href="#">Share link</a>
+      <button type="button" id="share-copy" class="share-copy">Copy share link</button>
+      <span id="share-status" class="share-status" aria-live="polite"></span>
+    </section>
+
+    <footer class="footer">
+      <p>Friis free-space path loss. Changing channel width adjusts both noise floors by 10·log<sub>10</sub>(new/old).</p>
+    </footer>
+  </div>
+
+  <script src="js/chart.umd.min.js"></script>
+  <script src="js/rf.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Local-only Cursor / deploy notes (never publish host details)
+.cursor/
+
+# Editor / OS
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
