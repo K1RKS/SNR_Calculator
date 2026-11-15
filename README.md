@@ -49,10 +49,16 @@ Chart.js is shipped under `js/` (`chart.umd.min.js`) so the page works without a
 The **Share link** control builds a URL of the form:
 
 ```
-https://your-host/path/to/page/#f=5800&u=mi&bw=10&c=Site+notes&a_name=North&b_name=South&...
+https://your-host/path/to/page/#f=5800&u=mi&bw=10&rd=12.5&c=Site+notes&a_name=North&b_name=South&...
 ```
 
-Opening that URL restores frequency, units, channel width, distances, comments, radio names, and both radios’ RF settings. Other sites can deep-link with those hash parameters to pre-fill the page. Comments use the `c` parameter (up to 2000 characters).
+Opening that URL restores frequency, units, channel width, max/readout distances, comments, radio names, and both radios’ RF settings. Other sites can deep-link with those hash parameters to pre-fill the page.
+
+Useful hash keys:
+
+- `rd` — readout distance (also draws the graph marker)
+- `c` — comments (up to 2000 characters)
+- `a_name` / `b_name` — radio display names
 
 ## License
 

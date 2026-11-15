@@ -87,6 +87,40 @@
     syncReadoutRange(state.maxDistance, state.readoutDistance);
     applyRadioToPanel(els.radioA, state.radioA);
     applyRadioToPanel(els.radioB, state.radioB);
+    syncCommentsSize();
+  }
+
+  var COMMENTS_MIN_LINES = 3;
+  var COMMENTS_MAX_LINES = 30;
+
+  function syncCommentsSize() {
+    var ta = els.comments;
+    if (!ta) {
+      return;
+    }
+    var style = window.getComputedStyle(ta);
+    var lineHeight = parseFloat(style.lineHeight);
+    if (!isFinite(lineHeight) || lineHeight <= 0) {
+      lineHeight = parseFloat(style.fontSize) * 1.4 || 20;
+    }
+    var padY =
+      (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
+    var borderY =
+      (parseFloat(style.borderTopWidth) || 0) +
+      (parseFloat(style.borderBottomWidth) || 0);
+    var minH = lineHeight * COMMENTS_MIN_LINES + padY + borderY;
+    var maxH = lineHeight * COMMENTS_MAX_LINES + padY + borderY;
+
+    ta.style.height = "auto";
+    ta.style.overflowY = "hidden";
+    var needed = Math.max(ta.scrollHeight, minH);
+    if (needed <= maxH) {
+      ta.style.height = needed + "px";
+      ta.style.overflowY = "hidden";
+    } else {
+      ta.style.height = maxH + "px";
+      ta.style.overflowY = "auto";
+    }
   }
 
   function syncCustomFreqVisibility() {
@@ -178,6 +212,63 @@
     };
   }
 
+  function buildReadoutMarkerPlugin() {
+    return {
+      id: "readoutMarker",
+      afterDatasetsDraw: function (c) {
+        var rd = c.$readoutDistance;
+        if (!isFinite(rd)) {
+          return;
+        }
+        var xScale = c.scales.x;
+        var yScale = c.scales.y;
+        var area = c.chartArea;
+        var x = xScale.getPixelForValue(rd);
+        if (x < area.left || x > area.right) {
+          return;
+        }
+        var ctx = c.ctx;
+        var unit = c.$readoutUnit || "mi";
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([5, 4]);
+        ctx.strokeStyle = "rgba(232, 240, 234, 0.75)";
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(x, area.top);
+        ctx.lineTo(x, area.bottom);
+        ctx.stroke();
+
+        function drawPoint(snr, color) {
+          if (!isFinite(snr)) {
+            return;
+          }
+          var y = yScale.getPixelForValue(snr);
+          if (y < area.top || y > area.bottom) {
+            return;
+          }
+          ctx.beginPath();
+          ctx.fillStyle = color;
+          ctx.strokeStyle = "#04140c";
+          ctx.lineWidth = 1.5;
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        drawPoint(c.$readoutAbSnr, "#3d9b6a");
+        drawPoint(c.$readoutBaSnr, "#c4a35a");
+
+        ctx.fillStyle = "rgba(232, 240, 234, 0.9)";
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
+        var label = formatNum(rd, 2) + " " + unit;
+        var labelY = area.top + 12;
+        ctx.fillText(label, x, labelY);
+        ctx.restore();
+      }
+    };
+  }
+
   function initChart() {
     var ctx = document.getElementById("snr-chart").getContext("2d");
     chart = new Chart(ctx, {
@@ -262,10 +353,10 @@
           var maxD = Number(els.maxDistance.value) || 0;
           x = Math.max(0, Math.min(maxD, x));
           els.readoutDistance.value = String(roundTo(x, 2));
-          refresh(false);
+          refresh();
         }
       },
-      plugins: [buildThresholdPlugin()]
+      plugins: [buildThresholdPlugin(), buildReadoutMarkerPlugin()]
     });
   }
 
@@ -302,7 +393,6 @@
     });
     chart.options.scales.x.title.text = "Distance (" + unitLabel + ")";
     chart.options.scales.x.max = state.maxDistance;
-    chart.update("none");
 
     syncReadoutRange(state.maxDistance, state.readoutDistance);
     state.readoutDistance = Number(els.readoutDistance.value);
@@ -310,6 +400,12 @@
 
     var ab = RF.linkAtDistance(state.readoutDistance, state.units, freq, a, b);
     var ba = RF.linkAtDistance(state.readoutDistance, state.units, freq, b, a);
+
+    chart.$readoutDistance = state.readoutDistance;
+    chart.$readoutUnit = unitLabel;
+    chart.$readoutAbSnr = ab.snr;
+    chart.$readoutBaSnr = ba.snr;
+    chart.update("none");
 
     els.labelRssiAb.textContent = labelAb + " RSSI";
     els.labelSnrAb.textContent = labelAb + " SNR";
@@ -362,7 +458,11 @@
   }
 
   function bind() {
-    els.comments.addEventListener("input", refresh);
+    els.comments.addEventListener("input", function () {
+      syncCommentsSize();
+      refresh();
+    });
+    window.addEventListener("resize", syncCommentsSize);
     els.freqPreset.addEventListener("change", function () {
       if (els.freqPreset.value !== "custom") {
         els.freqCustom.value = els.freqPreset.value;
@@ -441,6 +541,7 @@
     initChart();
     bind();
     refresh();
+    requestAnimationFrame(syncCommentsSize);
   }
 
   if (document.readyState === "loading") {

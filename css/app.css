@@ -84,8 +84,10 @@ body {
 
 .comments-field textarea {
   width: 100%;
-  min-height: 4.5rem;
-  resize: vertical;
+  min-height: calc(1.4em * 3 + 1.1rem);
+  max-height: calc(1.4em * 30 + 1.1rem);
+  resize: none;
+  overflow-y: hidden;
   padding: 0.55rem 0.65rem;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -93,6 +95,7 @@ body {
   color: var(--ink);
   font: inherit;
   line-height: 1.4;
+  box-sizing: border-box;
 }
 
 .comments-field textarea:focus {
